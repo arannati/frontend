@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "api:gen": "orval"
+    "api:gen": "orval",
+    "format": "prettier --write 'src/**/*.{ts,tsx,js,jsx,json,md,mdx,yml,yaml}'"
   },
   "dependencies": {
     "@tanstack/react-form": "^1.28.5",
