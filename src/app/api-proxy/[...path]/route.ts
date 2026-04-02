@@ -18,6 +18,8 @@ async function proxy(req: NextRequest, path: string[]): Promise<NextResponse> {
 	})
 
 	const resHeaders = new Headers(upstream.headers)
+	resHeaders.delete('content-encoding')
+	resHeaders.delete('content-length')
 
 	// Strip Domain attribute from Set-Cookie so the browser stores the cookie
 	// for the current origin (localhost) instead of the production domain.
