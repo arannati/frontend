@@ -10,7 +10,12 @@ export interface Category {
 	updatedAt: string
 }
 
-export const getCategories = () => api.get<Category[]>('/categories').then((r) => r.data)
+export interface CategoriesResponse {
+	categories: Category[]
+}
+
+export const getCategories = () =>
+	api.get<CategoriesResponse>('/categories').then((r) => r.data.categories ?? [])
 
 export const getCategoryBySlug = (slug: string) =>
 	api.get<Category>(`/categories/${slug}`).then((r) => r.data)

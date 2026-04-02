@@ -28,6 +28,8 @@ export interface PaymentMethod {
 
 export interface CreatePaymentRequest {
 	orderId: string
+	amount: number
+	currency: string
 	methodId?: string
 }
 

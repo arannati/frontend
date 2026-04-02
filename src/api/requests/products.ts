@@ -18,34 +18,22 @@ export interface Product {
 	currency: string
 	countryOfOrigin: string
 	brandId: string
-	brand?: Brand
-	categories?: Category[]
+	brand?: { id: string; title: string; slug: string }
+	categories?: { id: string; title: string; slug: string }[]
 	createdAt: string
 	updatedAt: string
 }
 
-export interface Brand {
-	id: string
-	title: string
-	slug: string
-}
-
-export interface Category {
-	id: string
-	title: string
-	slug: string
-}
-
 export interface ProductsResponse {
-	items: Product[]
-	total: number
+	products: Product[]
+	total?: number
 }
 
 export const getProducts = (params?: ProductControllerGetAllParams) =>
-	api.get<ProductsResponse>('/products', { params }).then((r) => r.data)
+	api.get<ProductsResponse>('/products', { params: { offset: 0, ...params } }).then((r) => r.data)
 
 export const getProductBySlug = (slug: string) =>
-	api.get<Product>(`/products/${slug}`).then((r) => r.data)
+	api.get<{ product: Product }>(`/products/${slug}`).then((r) => r.data.product)
 
 export const createProduct = (data: CreateProductRequest) =>
 	instance.post<Product>('/products', data).then((r) => r.data)

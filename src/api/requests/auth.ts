@@ -7,6 +7,8 @@ import type {
 
 import { api } from '../instance'
 
+export type { SendOtpRequestType, VerifyOtpRequestType } from '@/api/generated'
+
 export interface AuthTokensResponse {
 	accessToken: string
 }

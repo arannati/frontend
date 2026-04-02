@@ -1,18 +1,23 @@
+import path from 'path'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-	images: {
+	turbopack: {
+		root: path.resolve(__dirname),
+	},
+images: {
 		remotePatterns: [
 			{
 				protocol: 'https',
-				hostname: '**'
+				hostname: 'media.arannati.kz',
 			},
 			{
 				protocol: 'http',
-				hostname: 'localhost'
-			}
-		]
-	}
+				hostname: 'localhost',
+				port: '9000',
+			},
+		],
+	},
 }
 
 export default nextConfig

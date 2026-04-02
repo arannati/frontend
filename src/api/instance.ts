@@ -5,8 +5,11 @@ import { deleteCookie, getCookie, setCookie } from '@/lib/cookies'
 
 import { refresh } from './requests/auth'
 
+const baseURL =
+	typeof window === 'undefined' ? process.env.API_BASE_URL : process.env.NEXT_PUBLIC_API_URL
+
 const options: CreateAxiosDefaults = {
-	baseURL: process.env.NEXT_PUBLIC_API_URL,
+	baseURL,
 	headers: {
 		'Content-Type': 'application/json',
 	},
@@ -16,7 +19,16 @@ const options: CreateAxiosDefaults = {
 const api = axios.create(options)
 const instance = axios.create(options)
 
+api.interceptors.request.use(async (config) => {
+	const accessToken = await getCookie('accessToken')
+
+	if (config?.headers && accessToken) config.headers.Authorization = `Bearer ${accessToken}`
+
+	return config
+})
+
 let isRefreshing = false
+let refreshFailed = false
 let failedQueue: Array<{
 	resolve: (token: string) => void
 	reject: (error: unknown) => void
@@ -33,8 +45,8 @@ const processQueue = (error: unknown, token: string | null = null) => {
 	failedQueue = []
 }
 
-instance.interceptors.request.use((config) => {
-	const accessToken = getCookie('accessToken')
+instance.interceptors.request.use(async (config) => {
+	const accessToken = await getCookie('accessToken')
 
 	if (config?.headers && accessToken) config.headers.Authorization = `Bearer ${accessToken}`
 
@@ -44,18 +56,27 @@ instance.interceptors.request.use((config) => {
 instance.interceptors.response.use(
 	(res) => res,
 	async (err) => {
+		const isServer = typeof window === 'undefined'
 		const originalRequest = err.config
 
-		if (err?.response?.status === 401 && !originalRequest._isRetry) {
+		if (!originalRequest) return Promise.reject(err)
+
+		if (err?.response?.status === 401 && !originalRequest._isRetry && !refreshFailed) {
 			if (isRefreshing) {
 				return new Promise<string>((resolve, reject) => {
 					failedQueue.push({ resolve, reject })
 				})
 					.then((token) => {
+						if (!originalRequest.headers) originalRequest.headers = {}
 						originalRequest.headers.Authorization = `Bearer ${token}`
 						return instance(originalRequest)
 					})
 					.catch((error) => Promise.reject(error))
+			}
+
+			// На сервере не делаем refresh во избежание бесконечных циклов в Node.js
+			if (isServer) {
+				return Promise.reject(err)
 			}
 
 			originalRequest._isRetry = true
@@ -63,7 +84,7 @@ instance.interceptors.response.use(
 
 			try {
 				const response = await refresh()
-				const newToken = response.accessToken
+				const newToken = response?.accessToken
 
 				if (!newToken) throw new Error('No access token in refresh response')
 
@@ -71,12 +92,13 @@ instance.interceptors.response.use(
 				instance.defaults.headers.common.Authorization = `Bearer ${newToken}`
 				processQueue(null, newToken)
 
+				if (!originalRequest.headers) originalRequest.headers = {}
+				originalRequest.headers.Authorization = `Bearer ${newToken}`
 				return instance(originalRequest)
 			} catch (refreshError) {
 				processQueue(refreshError, null)
 				deleteCookie('accessToken')
-
-				if (typeof window !== 'undefined') window.location.href = '/auth/login'
+				refreshFailed = true
 
 				return Promise.reject(refreshError)
 			} finally {
@@ -100,6 +122,10 @@ export const customInstance = <T>(config: AxiosRequestConfig): Promise<T> => {
 	promise.cancel = () => source.cancel('Query was cancelled')
 
 	return promise
+}
+
+export const resetRefreshState = () => {
+	refreshFailed = false
 }
 
 export { api, instance }

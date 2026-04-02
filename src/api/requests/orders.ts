@@ -11,19 +11,21 @@ export interface OrderItem {
 	productSlug: string
 	price: number
 	quantity: number
+	originalQuantity: number
 	currency: string
 }
 
 export interface Order {
 	id: string
 	userId: string
+	user?: { id: string; email?: string; phone?: string; name?: string }
 	status: OrderStatus
-	shippingAddress: string
+	shippingAddress?: string
 	totalAmount: number
 	currency: string
-	items: OrderItem[]
+	items?: OrderItem[]
 	createdAt: string
-	updatedAt: string
+	updatedAt?: string
 }
 
 export interface OrdersResponse {
@@ -36,23 +38,44 @@ export const createOrder = (data: CreateOrderRequest) =>
 
 export const getOrder = (id: string) => instance.get<Order>(`/orders/${id}`).then((r) => r.data)
 
-export const getMyOrders = () => instance.get<OrdersResponse>('/orders').then((r) => r.data)
+export const getMyOrders = () =>
+	instance
+		.get<{ orders: Order[]; totalCount: number }>('/orders')
+		.then((r) => ({ items: r.data.orders ?? [], total: r.data.totalCount ?? 0 }))
 
 export const cancelOrder = (id: string) =>
 	instance.delete<void>(`/orders/${id}`).then((r) => r.data)
 
 // Admin
 export const getAllOrders = (params?: { status?: OrderStatus; limit?: number; offset?: number }) =>
-	instance.get<OrdersResponse>('/admin/orders', { params }).then((r) => r.data)
+	instance
+		.get<{ orders: Order[]; totalCount: number }>('/admin/orders', { params })
+		.then((r) => ({ items: r.data.orders ?? [], total: r.data.totalCount ?? 0 }))
 
 export const confirmOrder = (id: string) =>
-	instance.patch<Order>(`/admin/orders/${id}/confirm`).then((r) => r.data)
+	instance.post<Order>(`/admin/orders/${id}/confirm`).then((r) => r.data)
 
 export const shipOrder = (id: string) =>
-	instance.patch<Order>(`/admin/orders/${id}/ship`).then((r) => r.data)
+	instance.post<Order>(`/admin/orders/${id}/ship`).then((r) => r.data)
 
 export const deliverOrder = (id: string) =>
-	instance.patch<Order>(`/admin/orders/${id}/deliver`).then((r) => r.data)
+	instance.post<Order>(`/admin/orders/${id}/deliver`).then((r) => r.data)
 
 export const adminCancelOrder = (id: string) =>
-	instance.delete<void>(`/admin/orders/${id}/cancel`).then((r) => r.data)
+	instance.post<void>(`/admin/orders/${id}/cancel`).then((r) => r.data)
+
+export const removeOrderItem = ({ orderId, productId }: { orderId: string; productId: string }) =>
+	instance.delete<Order>(`/admin/orders/${orderId}/items/${productId}`).then((r) => r.data)
+
+export const updateOrderItemQuantity = ({
+	orderId,
+	productId,
+	quantity,
+}: {
+	orderId: string
+	productId: string
+	quantity: number
+}) =>
+	instance
+		.post<Order>(`/admin/orders/${orderId}/items/${productId}/quantity`, { quantity })
+		.then((r) => r.data)

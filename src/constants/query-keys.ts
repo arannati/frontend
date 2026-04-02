@@ -31,4 +31,6 @@ export const queryKeys = {
 	},
 	me: ['me'] as const,
 	account: ['account'] as const,
+	roleUpgrade: ['role-upgrade'] as const,
+	adminUsers: (params?: object) => ['admin', 'users', params] as const,
 }

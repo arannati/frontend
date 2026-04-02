@@ -1,8 +1,14 @@
+import { AxiosProgressEvent } from 'axios'
+
 import type { CreateContentRequest, EducationControllerListPublicParams } from '@/api/generated'
 
 import { api, instance } from '../instance'
 
 export type ContentType = 'VIDEO' | 'ARTICLE' | 'LINK'
+
+export interface UploadResponse {
+	key: string
+}
 
 export interface EducationContent {
 	id: string
@@ -51,3 +57,17 @@ export const publishContent = (id: string, publish: boolean) =>
 
 export const deleteContent = (id: string) =>
 	instance.delete<void>(`/education/content/${id}`).then((r) => r.data)
+
+export const uploadEducationMaterial = (
+	file: File,
+	onUploadProgress?: (progressEvent: AxiosProgressEvent) => void,
+) => {
+	const formData = new FormData()
+	formData.append('file', file)
+	return instance
+		.post<UploadResponse>('/education/upload', formData, {
+			headers: { 'Content-Type': 'multipart/form-data' },
+			onUploadProgress,
+		})
+		.then((r) => r.data)
+}

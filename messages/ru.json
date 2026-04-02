@@ -1,7 +1,9 @@
 {
   "nav.catalog": "Каталог",
   "nav.brands": "Бренды",
-  "nav.education": "Образование",
+  "nav.education": "Косметологам",
+  "nav.about": "О нас",
+  "nav.contacts": "Контакты",
   "nav.account": "Профиль",
   "nav.cart": "Корзина",
   "nav.admin": "Админ",

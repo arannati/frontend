@@ -10,7 +10,11 @@ export interface Brand {
 	updatedAt: string
 }
 
-export const getBrands = () => api.get<Brand[]>('/brands').then((r) => r.data)
+export interface BrandsResponse {
+	brands: Brand[]
+}
+
+export const getBrands = () => api.get<BrandsResponse>('/brands').then((r) => r.data.brands ?? [])
 
 export const getBrandBySlug = (slug: string) =>
 	api.get<Brand>(`/brands/${slug}`).then((r) => r.data)

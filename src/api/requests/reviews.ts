@@ -2,9 +2,12 @@ import type { AddReplyRequest, CreateReviewRequest } from '@/api/generated'
 
 import { api, instance } from '../instance'
 
+export type UserRole = 'USER' | 'ADMIN' | 'COSMETOLOGIST'
+
 export interface ReviewReply {
 	id: string
 	userId: string
+	role?: UserRole
 	text: string
 	createdAt: string
 }
@@ -12,6 +15,7 @@ export interface ReviewReply {
 export interface Review {
 	id: string
 	userId: string
+	role?: UserRole
 	productId: string
 	rating: number
 	text: string
@@ -24,17 +28,29 @@ export interface Review {
 export interface RatingStats {
 	average: number
 	total: number
-	distribution: Record<string, number>
 }
 
 export const createReview = (data: CreateReviewRequest) =>
 	instance.post<Review>('/reviews', data).then((r) => r.data)
 
 export const getProductReviews = (productId: string) =>
-	api.get<Review[]>(`/products/${productId}/reviews`).then((r) => r.data)
+	api.get<{ reviews: Review[]; totalCount: number }>(`/reviews/products/${productId}`).then((r) =>
+		(r.data.reviews ?? []).map((review) => ({
+			...review,
+			replies: review.replies ?? [],
+		})),
+	)
 
 export const getProductRating = (productId: string) =>
-	api.get<RatingStats>(`/products/${productId}/rating`).then((r) => r.data)
+	api
+		.get<{ averageRating: number; totalReviews: number }>(`/reviews/products/${productId}/rating`)
+		.then(
+			(r) =>
+				({
+					average: r.data.averageRating,
+					total: r.data.totalReviews,
+				}) satisfies RatingStats,
+		)
 
 export const deleteReview = (id: string) =>
 	instance.delete<void>(`/reviews/${id}`).then((r) => r.data)

@@ -1,10 +1,12 @@
 import type { AddCartItemRequest } from '@/api/generated'
 
 import { instance } from '../instance'
+import type { Product } from './products'
 
 export interface CartItem {
 	productId: string
 	quantity: number
+	product: Product
 }
 
 export interface Cart {

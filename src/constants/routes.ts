@@ -19,6 +19,7 @@ export const ROUTES = {
 	CART: '/cart',
 	CHECKOUT: {
 		ROOT: '/checkout',
+		PAYMENT: '/checkout/payment',
 		SUCCESS: '/checkout/success',
 	},
 	ACCOUNT: {
@@ -29,6 +30,10 @@ export const ROUTES = {
 		UPGRADE_ROLE: '/account/upgrade-role',
 	},
 	EDUCATION: '/education',
+	EDUCATION_SINGLE: (id: string) => `/education/${id}`,
+	COSMETOLOGISTS: '/cosmetologists',
+	ABOUT: '/about',
+	CONTACTS: '/contacts',
 	ADMIN: {
 		ROOT: '/admin',
 		PRODUCTS: '/admin/products',
