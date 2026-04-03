@@ -10,47 +10,36 @@ import { Spinner } from '@/components/ui/spinner'
 import { ROUTES } from '@/constants/routes'
 import { setCookie } from '@/lib/cookies'
 
-// После авторизации Telegram редиректит на return_to#tgAuthResult=<base64>
-// Данные приходят как хэш-фрагмент (#tgAuthResult=...), не как query-параметр
-function extractTgAuthResult(): string {
-	if (typeof window === 'undefined') return ''
-	const hash = window.location.hash // '#tgAuthResult=<base64>'
-	const match = hash.match(/[#&]tgAuthResult=([^&]*)/)
-	return match ? decodeURIComponent(match[1]) : ''
-}
-
 export default function TelegramCallbackPage() {
 	const router = useRouter()
 	const [error, setError] = useState(false)
 
 	useEffect(() => {
-		const tgAuthResult = extractTgAuthResult()
+		const hash = window.location.hash
+		const params = new URLSearchParams(hash.slice(1))
 
-		if (!tgAuthResult) {
+		const result = params.get('tgAuthResult')
+
+		if (!result) {
 			// Нет данных — пользователь попал сюда напрямую, не через Telegram
 			router.replace(ROUTES.AUTH.LOGIN)
 			return
 		}
 
-		verifyTelegram({ tgAuthResult })
+		verifyTelegram({ tgAuthResult: result })
 			.then((data) => {
 				if (data.accessToken) {
 					setCookie('accessToken', data.accessToken)
 					router.replace(ROUTES.ACCOUNT.ROOT)
-				} else if (data.url) {
-					// Новый пользователь — нужно взаимодействие с ботом
-					// data.url = https://t.me/BOT?start=sessionId
-					const sessionId = new URL(data.url).searchParams.get('start')
-					if (sessionId) {
-						// Открываем бота в новой вкладке и показываем страницу финализации
-						window.open(data.url, '_blank')
-						router.replace(`${ROUTES.AUTH.TG_FINALIZE}?sessionId=${sessionId}`)
-					} else {
-						window.location.href = data.url
-					}
-				} else {
-					setError(true)
-				}
+					return
+				} 
+
+				if (data.url) {
+					router.replace(data.url)
+					return
+				} 
+
+				setError(true)
 			})
 			.catch(() => setError(true))
 	}, []) // eslint-disable-line react-hooks/exhaustive-deps
