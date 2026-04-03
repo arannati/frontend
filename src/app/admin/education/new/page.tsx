@@ -36,45 +36,53 @@ export default function AdminEducationNewPage() {
 	const [url, setUrl] = useState('')
 	const [tags, setTags] = useState('')
 
-	const [isUploading, setIsUploading] = useState(false)
-	const [uploadProgress, setUploadProgress] = useState(0)
+        const [videoFile, setVideoFile] = useState<File | null>(null)
+        const [isUploading, setIsUploading] = useState(false)
+        const [uploadProgress, setUploadProgress] = useState(0)
 
-	const handleTypeChange = (newType: string) => {
-		setType(newType)
-		setUrl('')
-	}
+        const handleTypeChange = (newType: string) => {
+                setType(newType)
+                setUrl('')
+                setVideoFile(null)
+        }
 
-	const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0]
-		if (!file) return
+        const handleVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                setVideoFile(file)
+                setUrl(URL.createObjectURL(file))
+        }
 
-		setIsUploading(true)
-		setUploadProgress(0)
+        const handleSubmit = async (e: React.FormEvent) => {
+                e.preventDefault()
 
-		try {
-			const res = await uploadEducationMaterial(file, (progressEvent) => {
-				if (progressEvent.total) {
-					setUploadProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total))
-				}
-			})
-			setUrl(getMediaSource(res.key))
-		} catch (error) {
-			console.error('Failed to upload video', error)
-		} finally {
-			setIsUploading(false)
-		}
-	}
+                let finalUrl = url
 
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault()
+                if (type === CreateContentRequestType.VIDEO && videoFile) {
+                        setIsUploading(true)
+                        setUploadProgress(0)
+                        try {
+                                const res = await uploadEducationMaterial(videoFile, (progressEvent) => {
+                                        if (progressEvent.total) {
+                                                setUploadProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total))
+                                        }
+                                })
+                                finalUrl = getMediaSource(res.key)
+                        } catch (error) {
+                                console.error('Failed to upload video', error)
+                                setIsUploading(false)
+                                return
+                        }
+                        setIsUploading(false)
+                }
 
-		createContent.mutate(
-			{
-				type: type as (typeof CreateContentRequestType)[keyof typeof CreateContentRequestType],
-				title,
-				description: description || '',
-				...(body && { body }),
-				...(url && { url }),
+                createContent.mutate(
+                        {
+                                type: type as (typeof CreateContentRequestType)[keyof typeof CreateContentRequestType],
+                                title,
+                                description: description || '',
+                                ...(body && { body }),
+                                ...(finalUrl && { url: finalUrl }),
 				...(tags && {
 					tags: tags
 						.split(',')
@@ -138,13 +146,13 @@ export default function AdminEducationNewPage() {
 						<label className='text-sm font-medium'>Видеофайл</label>
 						{!url ? (
 							<div className='relative'>
-								<input
-									type='file'
-									accept='video/*'
-									onChange={handleVideoUpload}
-									className='absolute inset-0 cursor-pointer opacity-0'
-									disabled={isUploading}
-								/>
+                                                                <input
+                                                                        type='file'
+                                                                        accept='video/*'
+                                                                        onChange={handleVideoSelect}
+                                                                        className='absolute inset-0 cursor-pointer opacity-0'
+                                                                        disabled={isUploading}
+                                                                />
 								<div className='border-muted-foreground/25 flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors hover:bg-black/5'>
 									{isUploading ? (
 										<>
@@ -170,10 +178,14 @@ export default function AdminEducationNewPage() {
 									<div className='flex h-10 w-10 shrink-0 items-center justify-center rounded bg-blue-100'>
 										<Upload className='h-5 w-5 text-blue-600' />
 									</div>
-									<div className='flex flex-col overflow-hidden'>
-										<span className='truncate text-sm font-medium'>Видео загружено</span>
-										<span className='truncate text-xs text-gray-500'>{url}</span>
-									</div>
+                                                                        <div className='flex flex-col overflow-hidden'>
+                                                                                <span className='truncate text-sm font-medium'>
+                                                                                        {videoFile ? 'Видео выбрано' : 'Видео загружено'}
+                                                                                </span>
+                                                                                <span className='truncate text-xs text-gray-500'>
+                                                                                        {videoFile ? videoFile.name : url}
+                                                                                </span>
+                                                                        </div>
 								</div>
 								<div className='flex items-center gap-2'>
 									<Link href={url} target='_blank'>
@@ -181,13 +193,16 @@ export default function AdminEducationNewPage() {
 											<ExternalLink className='h-4 w-4' />
 										</Button>
 									</Link>
-									<Button
-										type='button'
-										variant='ghost'
-										size='icon'
-										onClick={() => setUrl('')}
-										className='h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600'
-									>
+                                                                        <Button
+                                                                                type='button'
+                                                                                variant='ghost'
+                                                                                size='icon'
+                                                                                onClick={() => {
+                                                                                        setUrl('')
+                                                                                        setVideoFile(null)
+                                                                                }}
+                                                                                className='h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600'
+                                                                        >
 										<X className='h-4 w-4' />
 									</Button>
 								</div>
@@ -219,16 +234,16 @@ export default function AdminEducationNewPage() {
 					</p>
 				)}
 
-				<div className='flex gap-3'>
-					<Button
-						type='submit'
-						loading={createContent.isPending}
-						disabled={
-							!title.trim() || isUploading || (type === CreateContentRequestType.VIDEO && !url)
-						}
-					>
-						Создать
-					</Button>
+                                <div className='flex gap-3'>
+                                        <Button
+                                                type='submit'
+                                                loading={createContent.isPending || isUploading}
+                                                disabled={
+                                                        !title.trim() || isUploading || (type === CreateContentRequestType.VIDEO && !url)
+                                                }
+                                        >
+                                                {isUploading ? `Загрузка... ${uploadProgress}%` : 'Создать'}
+                                        </Button>
 					<Button
 						type='button'
 						variant='secondary'
