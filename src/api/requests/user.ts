@@ -47,14 +47,15 @@ export const updateUser = (data: PatchUserRequest) =>
 	instance.patch<User>('/user/@me', data).then((r) => r.data)
 
 export const uploadAvatar = (file: File, onUploadProgress?: (progressEvent: any) => void) => {
-	const formData = new FormData()
-	formData.append('file', file)
-	return instance
-		.patch<User>('/user/@me/avatar', formData, {
-			headers: { 'Content-Type': 'multipart/form-data' },
-			onUploadProgress,
-		})
-		.then((r) => r.data)
+        const formData = new FormData()
+        formData.append('file', file)
+        return instance
+                .patch<User>('/api-upload/user/@me/avatar', formData, {
+                        baseURL: '', // Disable default baseURL so it hits the domain root NextJS rewrites
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                        onUploadProgress,
+                })
+                .then((r) => r.data)
 }
 
 export const initEmailChange = (data: InitEmailChangeRequest) =>
@@ -125,11 +126,12 @@ export const reviewRoleUpgrade = (userId: string, data: ReviewRoleUpgradeRequest
 	instance.post<void>(`/admin/users/${userId}/role-upgrade/review`, data).then((r) => r.data)
 
 export const requestRoleUpgrade = (diplomaFile: File) => {
-	const formData = new FormData()
-	formData.append('file', diplomaFile)
-	return instance
-		.post<void>('/user/@me/upgrade-role', formData, {
-			headers: { 'Content-Type': 'multipart/form-data' },
-		})
-		.then((r) => r.data)
+        const formData = new FormData()
+        formData.append('file', diplomaFile)
+        return instance
+                .post<void>('/api-upload/user/@me/upgrade-role', formData, {
+                        baseURL: '', // Disable default baseURL so it hits the domain root NextJS rewrites
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                })
+                .then((r) => r.data)
 }

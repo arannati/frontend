@@ -59,15 +59,16 @@ export const deleteContent = (id: string) =>
 	instance.delete<void>(`/education/content/${id}`).then((r) => r.data)
 
 export const uploadEducationMaterial = (
-	file: File,
-	onUploadProgress?: (progressEvent: AxiosProgressEvent) => void,
+        file: File,
+        onUploadProgress?: (progressEvent: AxiosProgressEvent) => void,
 ) => {
-	const formData = new FormData()
-	formData.append('file', file)
-	return instance
-		.post<UploadResponse>('/education/upload', formData, {
-			headers: { 'Content-Type': 'multipart/form-data' },
-			onUploadProgress,
-		})
-		.then((r) => r.data)
+        const formData = new FormData()
+        formData.append('file', file)
+        return instance
+                .post<UploadResponse>('/api-upload/education/upload', formData, {
+                        baseURL: '', // disable instance baseURL so it uses root path
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                        onUploadProgress,
+                })
+                .then((r) => r.data)
 }
