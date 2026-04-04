@@ -22,7 +22,7 @@ interface Props {
 
 export async function generateStaticParams() {
 	const data = await getProducts({ limit: 100 }).catch(() => ({ products: [] }))
-	return data.products.map((p) => ({ slug: p.slug }))
+	return (data.products ?? []).map((p) => ({ slug: p.slug }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
