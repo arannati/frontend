@@ -86,6 +86,14 @@ const TECH_GROUPS = [
 			{ name: 'Jaeger', icon: '/technologies/jaegertracingio-icon.svg' },
 		],
 	},
+	{
+		label: 'Testing & automation',
+		color: '#ffdd00',
+		techs: [
+			{ name: 'Jest', icon: '/technologies/jest-svgrepo-com.svg' },
+			{ name: 'Playwright', icon: '/technologies/playwright-logo.svg' },
+		]
+	},
 ]
 
 const STATS = [
