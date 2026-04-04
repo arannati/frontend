@@ -36,6 +36,7 @@ export const ROUTES = {
 	CONTACTS: '/contacts',
 	PRIVACY_POLICY: '/privacy-policy',
 	PUBLIC_OFFER: '/public-offer',
+	DEV: '/dev',
 	ADMIN: {
 		ROOT: '/admin',
 		PRODUCTS: '/admin/products',

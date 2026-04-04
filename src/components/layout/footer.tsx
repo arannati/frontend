@@ -115,9 +115,17 @@ export function Footer() {
 					<div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
 						{/* Copyright + documents */}
 						<div className='flex flex-col gap-1'>
-							<p className='text-muted-foreground text-xs'>
-								© {new Date().getFullYear()} Arannati. Все права защищены.
-							</p>
+							<div className='flex items-center gap-3'>
+								<p className='text-muted-foreground text-xs'>
+									© {new Date().getFullYear()} Arannati. Все права защищены.
+								</p>
+								<Link
+									href={ROUTES.DEV}
+									className='text-muted-foreground/30 hover:text-muted-foreground/60 text-xs transition-colors'
+								>
+									dev
+								</Link>
+							</div>
 							<div className='flex flex-wrap gap-3'>
 								<Link
 									href={ROUTES.PRIVACY_POLICY}
