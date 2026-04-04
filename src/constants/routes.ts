@@ -34,6 +34,8 @@ export const ROUTES = {
 	COSMETOLOGISTS: '/cosmetologists',
 	ABOUT: '/about',
 	CONTACTS: '/contacts',
+	PRIVACY_POLICY: '/privacy-policy',
+	PUBLIC_OFFER: '/public-offer',
 	ADMIN: {
 		ROOT: '/admin',
 		PRODUCTS: '/admin/products',

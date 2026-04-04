@@ -82,9 +82,25 @@ export function Footer() {
 				</div>
 
 				<div className='border-border mt-10 border-t pt-6'>
-					<p className='text-muted-foreground text-center text-xs'>
-						© {new Date().getFullYear()} Arannati. Все права защищены.
-					</p>
+					<div className='flex flex-col items-center gap-3 sm:flex-row sm:justify-between'>
+						<p className='text-muted-foreground text-xs'>
+							© {new Date().getFullYear()} Arannati. Все права защищены.
+						</p>
+						<div className='flex gap-4'>
+							<Link
+								href={ROUTES.PRIVACY_POLICY}
+								className='text-muted-foreground hover:text-foreground text-xs transition-colors'
+							>
+								Политика конфиденциальности
+							</Link>
+							<Link
+								href={ROUTES.PUBLIC_OFFER}
+								className='text-muted-foreground hover:text-foreground text-xs transition-colors'
+							>
+								Публичная оферта
+							</Link>
+						</div>
+					</div>
 				</div>
 			</div>
 		</footer>

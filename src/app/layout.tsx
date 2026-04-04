@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Geist } from 'next/font/google'
 
 import '@/assets/styles/globals.css'
+import { CookieConsent } from '@/components/cookie-consent'
 import { ReactQueryProvider } from '@/providers/react-query'
 import { ThemeProvider } from '@/providers/theme'
 
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 			<body className={geist.variable}>
 				<ThemeProvider>
 					<ReactQueryProvider>{children}</ReactQueryProvider>
+					<CookieConsent />
 				</ThemeProvider>
 			</body>
 		</html>
