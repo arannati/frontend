@@ -1,3 +1,5 @@
+import { HashSection } from '@/components/hash-section'
+
 export default function PublicOfferPage() {
 	return (
 		<div className='mx-auto max-w-4xl px-4 py-16 sm:px-6'>
@@ -310,7 +312,7 @@ export default function PublicOfferPage() {
 					</p>
 				</section>
 
-				<section>
+				<HashSection id='returns' className='scroll-mt-24'>
 					<h2>13. Возврат товара</h2>
 					<p>
 						13.1. Покупатель вправе отказаться от Товара до подписания курьерской накладной при
@@ -338,7 +340,7 @@ export default function PublicOfferPage() {
 						13.5. Стоимость возврата Товара посредством курьера Продавца составляет 1 000 тенге,
 						которая удерживается из стоимости Товара при возврате средств Покупателю.
 					</p>
-				</section>
+				</HashSection>
 
 				<section>
 					<h2>14. Ответственность сторон</h2>
